@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Highsun Prime Oscillation Discovery</title>
+    
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    
+    <style>
+        body { background-color: #111; color: white; font-family: sans-serif; padding: 20px; text-align: center; }
+        .container { max-width: 900px; margin: 0 auto; background: #222; padding: 30px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        h1 { color: gold; margin-bottom: 10px; }
+        .author { color: #aaa; margin-bottom: 30px; }
+        #plot { background-color: white; border-radius: 10px; padding: 10px; margin-top: 20px; }
+        .controls { margin: 20px 0; padding: 15px; background: #333; border-radius: 10px; }
+        input[type=range] { width: 80%; }
+        .description { text-align: left; line-height: 1.6; color: #ccc; margin-top: 30px; border-top: 1px solid #444; padding-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Highsun Prime Oscillation Discovery</h1>
+    <div class="author">Discovered & Developed by <strong>Highsun</strong></div>
+
+    <div class="controls">
+        <label for="n_slider">n Value (Number of Primes): </label>
+        <input type="range" id="n_slider" min="1" max="1000" value="10">
+        <span id="n_display">10</span>
+    </div>
+
+    <div id="plot"></div>
+
+    <div class="description">
+        <h3>실험 정보 (Experimental Info)</h3>
+        <p>이 도구는 <strong>Highsun</strong>이 발견한 소수 역방향 연결 수열의 진동 패턴을 시각화합니다.</p>
+        <ul>
+            <li><strong>원리:</strong> n개의 소수를 역순으로 나열하여 분모($0.p_n p_{n-1} ... p_1$)를 생성합니다.</li>
+            <li><strong>특징:</strong> n이 증가함에 따라 발생하는 불규칙한 진동은 소수 계량 함수($\pi(x)$)의 임계 지점과 밀접한 관계를 가집니다.</li>
+            <li><strong>우선권 선언:</strong> 본 시각화 알고리즘 및 진동 분석 방법론의 우선권은 Highsun에게 있습니다.</li>
+        </ul>
+    </div>
+</div>
+
+<py-config>
+    packages = ["matplotlib", "sympy"]
+</py-config>
+
+<py-script>
+import matplotlib.pyplot as plt
+import sympy as sp
+from pyscript import display, when
+
+# 소수 데이터 미리 생성
+primes = list(sp.primerange(1, sp.prime(1000) + 1))
+
+def generate_plot(n):
+    a_vals = []
+    for i in range(1, n + 1):
+        # 역순 나열 분모 생성
+        s = "".join(str(p) for p in reversed(primes[:i]))
+        # 부동소수점 한계로 인한 슬라이싱
+        a_vals.append(1.0 / float("0." + s[:17]))
+    
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.plot(range(1, n + 1), a_vals, '-o', color='gold', markersize=4, linewidth=1)
+    ax.axhline(y=10.0, color='red', linestyle='--', alpha=0.3)
+    ax.axhline(y=1.0, color='red', linestyle='--', alpha=0.3)
+    ax.set_ylim(0, 11)
+    ax.set_facecolor('#fdfdfd')
+    ax.set_title(f"Highsun Oscillation (n={n})")
+    ax.grid(True, alpha=0.3)
+    
+    # 기존 그래프 지우고 새로 그리기
+    target = document.getElementById("plot")
+    target.innerHTML = ""
+    display(fig, target=target)
+
+@when("input", "#n_slider")
+def on_slider_change(event):
+    n = int(event.target.value)
+    document.getElementById("n_display").innerText = n
+    generate_plot(n)
+
+# 초기 실행
+generate_plot(10)
+</py-script>
+
+</body>
+</html>
